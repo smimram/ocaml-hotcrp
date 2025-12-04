@@ -60,15 +60,19 @@ let reviews h pid =
   |> List.map (fun l -> to_assoc l |> List.filter_map (fun (k,v) -> try Some (k, to_string v) with _ -> None))
   |> return
 
+(** Retrieve comments. *)
 let comments h pid =
   get_json h (string_of_int pid^"/comment") []
 
+(** Retrienve a comment. *)
 let comment h pid n =
   get_json h (string_of_int pid^"/comment") ["c",string_of_int n]
 
+(** Add a comment. *)
 let add_comment h pid ~text () =
   post h (string_of_int pid^"/comment") ["c","new"] ["text",[text]] >|= ignore
 
+(** Retrieve tags. *)
 let tags h pid =
   let* json = get_json h (string_of_int pid^"/tags") [] in
   let open Yojson.Safe.Util in
@@ -80,11 +84,14 @@ let tags h pid =
   in
   json |> member "tags" |> to_list |> List.map to_string |> List.map split |> return
 
+(** Add tags. *)
 let add_tags h pid tags =
   post h (string_of_int pid^"/tags") [] ["addtags",tags] >|= ignore
 
+(** Add a tag. *)
 let add_tag h pid tag = add_tags h pid [tag]
 
+(** Perform a search. *)
 let search h query =
   let* json = post_json h "search" [] ["q",[query]] in
   let open Yojson.Safe.Util in
