@@ -31,23 +31,27 @@ let get h fct params =
 let get_json h fct params =
   get h fct params >|= Yojson.Safe.from_string
 
-let post h ?(params=[]) fct form =
+let post h fct params form =
   let uri = Uri.add_query_params' (Uri.of_string (h.url ^ "/api/" ^ fct)) params in
+  Printf.printf "uri : %s\n%!" (Uri.to_string uri);
   let headers = Header.add (headers h) "Content-Type" "application/x-www-form-urlencoded" in
   let* resp, body = Client.post_form ~headers ~params:form uri in
   let* body = Cohttp_lwt.Body.to_string body in
-  (* Printf.printf "Done: %s\n%!" body; *)
+  print_endline body;
   if Http.Status.to_int @@ Http.Response.status resp <> 200 then raise (Error body)
   else return body
+
+let post_json h fct params form =
+  post h fct params form >|= Yojson.Safe.from_string
 
 let assert_ok json =
   let open Yojson.Safe.Util in
   if not (to_bool @@ member "ok" json) then raise (Error (Yojson.Safe.to_string json))
 
-let get_paper h pid =
+let paper h pid =
   get_json h (string_of_int pid^"/paper") []
 
-let get_reviews h pid =
+let reviews h pid =
   let* json = get_json h (string_of_int pid^"/review") [] in
   let open Yojson.Safe.Util in
   json
@@ -56,13 +60,16 @@ let get_reviews h pid =
   |> List.map (fun l -> to_assoc l |> List.filter_map (fun (k,v) -> try Some (k, to_string v) with _ -> None))
   |> return
 
-let get_comments h pid =
+let comments h pid =
   get_json h (string_of_int pid^"/comment") []
 
-let get_comment h pid n =
+let comment h pid n =
   get_json h (string_of_int pid^"/comment") ["c",string_of_int n]
 
-let get_tags h pid =
+let add_comment h pid ~text () =
+  post h (string_of_int pid^"/comment") ["c","new"] ["text",[text]] >|= ignore
+
+let tags h pid =
   let* json = get_json h (string_of_int pid^"/tags") [] in
   let open Yojson.Safe.Util in
   let split s =
@@ -74,9 +81,15 @@ let get_tags h pid =
   json |> member "tags" |> to_list |> List.map to_string |> List.map split |> return
 
 let add_tags h pid tags =
-  post h (string_of_int pid^"/tags") ["addtags",tags] >|= ignore
+  post h (string_of_int pid^"/tags") [] ["addtags",tags] >|= ignore
 
 let add_tag h pid tag = add_tags h pid [tag]
 
-let get_settings h =
+let search h query =
+  let* json = post_json h "search" [] ["q",[query]] in
+  let open Yojson.Safe.Util in
+  let ids = json |> member "ids" |> to_list |> List.map to_int in
+  return ids
+
+let settings h =
   get_json h "settings" []
