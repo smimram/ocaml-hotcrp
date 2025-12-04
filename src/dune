@@ -1,0 +1,5 @@
+(library
+ (public_name hotcrp)
+ (wrapped false)
+ (libraries cohttp cohttp-lwt-unix yojson)
+)
