@@ -18,7 +18,7 @@ let make ~token url =
 let headers h =
   Header.add (Header.init ()) "Authorization" ("Bearer " ^ h.token)
 
-let get h ?(params=[]) fct =
+let get h fct params =
   let uri = Uri.add_query_params' (Uri.of_string (h.url ^ "/api/" ^ fct)) params in
   Printf.printf "uri : %s\n%!" (Uri.to_string uri);
   let headers = headers h in
@@ -28,8 +28,8 @@ let get h ?(params=[]) fct =
   print_endline body;
   return body
 
-let get_json h ?params fct =
-  get h ?params fct >|= Yojson.Safe.from_string
+let get_json h fct params =
+  get h fct params >|= Yojson.Safe.from_string
 
 let post h ?(params=[]) fct form =
   let uri = Uri.add_query_params' (Uri.of_string (h.url ^ "/api/" ^ fct)) params in
@@ -45,17 +45,25 @@ let assert_ok json =
   if not (to_bool @@ member "ok" json) then raise (Error (Yojson.Safe.to_string json))
 
 let get_paper h pid =
-  get_json h (string_of_int pid^"/paper")
+  get_json h (string_of_int pid^"/paper") []
 
-let get_review h pid =
-  get_json h (string_of_int pid^"/review")
+let get_reviews h pid =
+  let* json = get_json h (string_of_int pid^"/review") [] in
+  let open Yojson.Safe.Util in
+  json
+  |> member "reviews"
+  |> to_list
+  |> List.map (fun l -> to_assoc l |> List.filter_map (fun (k,v) -> try Some (k, to_string v) with _ -> None))
+  |> return
 
-let get_comment h pid =
-  get_json h (string_of_int pid^"/review")
+let get_comments h pid =
+  get_json h (string_of_int pid^"/comment") []
+
+let get_comment h pid n =
+  get_json h (string_of_int pid^"/comment") ["c",string_of_int n]
 
 let get_tags h pid =
-  let* json = get_json h (string_of_int pid^"/tags") in
-  assert_ok json;
+  let* json = get_json h (string_of_int pid^"/tags") [] in
   let open Yojson.Safe.Util in
   let split s =
     let n = String.index s '#' in
@@ -71,4 +79,4 @@ let add_tags h pid tags =
 let add_tag h pid tag = add_tags h pid [tag]
 
 let get_settings h =
-  get_json h "settings"
+  get_json h "settings" []
