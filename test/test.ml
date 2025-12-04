@@ -14,8 +14,10 @@ let main () =
   Printf.printf "Token: %s\n%!" token;
   let h = HotCRP.make url ~token in
   let* p = HotCRP.get_paper h 650 in
+  let* tags = HotCRP.get_tags h 993 in
   ignore p;
   print_endline "Got paper!";
+  Printf.printf "tags: %s\n%!" (String.concat ", " tags);
   return ()
 
 let () =
