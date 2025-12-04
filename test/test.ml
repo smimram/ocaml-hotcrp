@@ -13,10 +13,9 @@ let main () =
   Printf.printf "Testing: %s\n%!" url;
   Printf.printf "Token: %s\n%!" token;
   let h = HotCRP.make url ~token in
-  let* p = HotCRP.get_paper h 650 in
+  (* let* p = HotCRP.get_paper h 650 in *)
   let* tags = HotCRP.get_tags h 993 in
   let* () = HotCRP.add_tag h 993 "test" in
-  ignore p;
   print_endline "Got paper!";
   Printf.printf "tags: %s\n%!" (String.concat ", " @@ List.map fst tags);
   return ()
