@@ -6,14 +6,24 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    - name: Install required packages
-      run: sudo apt-get -y install ocaml ocaml-dune ocaml-odoc libcohttp-lwt-unix-ocaml-dev libyojson-ocaml-dev
+    # - name: Install required packages
+      # run: sudo apt-get -y install ocaml ocaml-dune ocaml-odoc libcohttp-lwt-unix-ocaml-dev libyojson-ocaml-dev
+    # - name: Build
+      # run: dune build
+    # - name: Test
+      # run: dune runtest
+    - name: Set-up OCaml
+      uses: ocaml/setup-ocaml@v3
+      with:
+        ocaml-compiler: 5
+    - name: Install dependencies
+      run: opam install . --deps-only --with-test
     - name: Build
-      run: dune build
+      run: opam exec -- dune build
     - name: Test
-      run: dune runtest
+      run: opam exec -- dune runtest
     - name: Build documentation
-      run: dune build @doc
+      run: opam exec -- dune build @doc
     - name: Upload website artifact
       uses: actions/upload-pages-artifact@v3
       with:
