@@ -76,6 +76,9 @@ module JSON = struct
   let add_tags h pid tags =
     post h (string_of_int pid^"/tags") [] ["addtags",tags]
 
+  let delete_tags h pid tags =
+    post h (string_of_int pid^"/tags") [] ["deltags",tags]
+
   (** Perform a search. *)
   let search h query =
     post h "search" [] ["q",[query]]
@@ -115,9 +118,16 @@ let add_tags h pid tags =
 let add_tag h pid tag =
   add_tags h pid [tag]
 
+let delete_tags h pid tags =
+  JSON.delete_tags h pid tags >|= ignore
+
+let delete_tag h pid tag =
+  delete_tags h pid [tag]
+
 (** Perform a search. *)
-let search h query =
+let search_ids h query =
   let* json = JSON.search h query in
   let open Yojson.Safe.Util in
   let ids = json |> member "ids" |> to_list |> List.map to_int in
+
   return ids
