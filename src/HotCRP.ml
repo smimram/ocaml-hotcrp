@@ -95,6 +95,9 @@ module JSON = struct
 
   let events h =
     get h "events" []
+
+  let whoami h =
+    get h "whoami" []
 end
 
 open Yojson.Safe.Util
@@ -145,3 +148,8 @@ let search_ids h query =
 let events h =
   let* json = JSON.events h in
   json |> member "rows" |> to_list |> List.map to_string |> return
+
+(** Mail of current user. *)
+let whoami h =
+  let* json = JSON.whoami h in
+  json |> member "email" |> to_string |> return
