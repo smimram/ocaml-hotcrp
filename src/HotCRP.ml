@@ -89,10 +89,14 @@ module JSON = struct
 
   let display_fields h =
     get h "displayfields" []
+
+  let events h =
+    get h "events" []
 end
 
+open Yojson.Safe.Util
+
 let reviews h pid =
-  let open Yojson.Safe.Util in
   let* json = JSON.reviews h pid in
   json
   |>  member "reviews"
@@ -103,7 +107,6 @@ let reviews h pid =
 (** Retrieve tags. *)
 let tags h pid =
   let* json = JSON.tags h pid in
-  let open Yojson.Safe.Util in
   let split s =
     let n = String.index s '#' in
     let tag = String.sub s 0 n in
@@ -130,7 +133,8 @@ let delete_tag h pid tag =
 (** Perform a search. *)
 let search_ids h query =
   let* json = JSON.search h query in
-  let open Yojson.Safe.Util in
-  let ids = json |> member "ids" |> to_list |> List.map to_int in
+  json |> member "ids" |> to_list |> List.map to_int |> return
 
-  return ids
+let events h =
+  let* json = JSON.events h in
+  json |> member "rows" |> to_list |> List.map to_string |> return
