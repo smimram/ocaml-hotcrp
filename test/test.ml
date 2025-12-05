@@ -19,7 +19,7 @@ let main () =
   (* let* _ = HotCRP.reviews h 993 in *)
   let* _ = HotCRP.search h "" in
   print_endline "Got paper!";
-  Printf.printf "tags: %s\n%!" (String.concat ", " @@ List.map fst tags);
+  Printf.printf "tags: %s\n%!" (String.concat ", " tags);
   (* let* _ = HotCRP.add_comment h 993 ~text:"This is a test" () in *)
   return ()
 
