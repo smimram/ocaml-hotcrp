@@ -86,6 +86,9 @@ module JSON = struct
   (** Retrieve settings. *)
   let settings h =
     get h "settings" []
+
+  let display_fields h =
+    get h "displayfields" []
 end
 
 let reviews h pid =
