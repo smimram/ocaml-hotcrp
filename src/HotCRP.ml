@@ -84,7 +84,7 @@ module JSON = struct
 
   (** Perform a search. *)
   let search h query =
-    post h "search" [] ["q",[query]]
+    get h "search" ["q",query]
 
   (** Retrieve settings. *)
   let settings h =
@@ -122,6 +122,41 @@ let tags h pid =
   in
   json |> member "tags" |> to_list |> List.map to_string |> List.map split |> return
 
+(** An author. *)
+type author =
+  {
+    email : string option;
+    first : string option;
+    last : string option;
+    affiliation : string option;
+    contact : bool;
+  }
+
+let to_author json =
+  let email = to_string_option @@ member "email" json in
+  let first = to_string_option @@ member "first" json in
+  let last = to_string_option @@ member "last" json in
+  let affiliation = to_string_option @@ member "affiliation" json in
+  let contact = Option.value ~default:false @@ to_bool_option @@ member "contact" json in
+  { email; first; last; affiliation; contact }
+
+(** A paper. *)
+type paper =
+  {
+    title : string;
+    abstract : string;
+    authors : author list;
+  }
+
+(** Get a paper. *)
+let paper h pid =
+  let* json = JSON.paper h pid in
+  let paper = member "paper" json in
+  let title = to_string @@ member "title" paper in
+  let abstract = to_string @@ member "abstract" paper in
+  let authors = List.map to_author @@ to_list @@ member "authors" paper in
+  return { title; abstract; authors }
+
 (** Add tags. *)
 let add_tags h pid tags =
   JSON.add_tags h pid tags >|= ignore
@@ -130,12 +165,15 @@ let add_tags h pid tags =
 let add_tag h pid tag =
   add_tags h pid [tag]
 
+(** Delete tags. *)
 let delete_tags h pid tags =
   JSON.delete_tags h pid tags >|= ignore
 
+(** Delete a tag. *)
 let delete_tag h pid tag =
   delete_tags h pid [tag]
 
+(** All available tags. *)
 let all_tags h =
  let* json = JSON.all_tags h in
  json |> member "tags" |> to_list |> List.map to_string |> return
@@ -149,7 +187,7 @@ let events h =
   let* json = JSON.events h in
   json |> member "rows" |> to_list |> List.map to_string |> return
 
-(** Mail of current user. *)
+(** Identity of current user. *)
 let whoami h =
   let* json = JSON.whoami h in
   json |> member "email" |> to_string |> return
