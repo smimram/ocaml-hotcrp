@@ -6,4 +6,8 @@
 (generate_opam_files true)
 (package
  (name hotcrp)
+ (depends
+   cohttp-lwt-unix
+   yojson
+ )
 )
