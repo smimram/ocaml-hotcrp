@@ -178,7 +178,7 @@ let all_tags h =
  let* json = JSON.all_tags h in
  json |> member "tags" |> to_list |> List.map to_string |> return
 
-(** Perform a search. *)
+(** Perform a search returning paper ids. *)
 let search_ids h query =
   let* json = JSON.search h query in
   json |> member "ids" |> to_list |> List.map to_int |> return
@@ -191,3 +191,12 @@ let events h =
 let whoami h =
   let* json = JSON.whoami h in
   json |> member "email" |> to_string |> return
+
+(** Blocking interface. *)
+module Blocking = struct
+  open Lwt_main
+
+  let tags h pid = run @@ tags h pid
+
+  let add_tag h pid tag = run @@ add_tag h pid tag
+end
