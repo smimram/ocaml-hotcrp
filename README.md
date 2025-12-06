@@ -1,4 +1,4 @@
 ocaml-hotcrp
 ============
 
-A simple library to use the [HotCRP API](https://hotcrp.com/devel/api/).
+[HotCRP](https://hotcrp.com/) is an open-source online platform for managing reviews for conferences. This library allows to use its [API](https://hotcrp.com/devel/api/) in order to automate part the processing of reviews.
