@@ -105,7 +105,7 @@ open Yojson.Safe.Util
 let reviews h pid =
   let* json = JSON.reviews h pid in
   json
-  |>  member "reviews"
+  |> member "reviews"
   |> to_list
   |> List.map (fun l -> to_assoc l |> List.filter_map (fun (k,v) -> try Some (k, to_string v) with _ -> None))
   |> return
