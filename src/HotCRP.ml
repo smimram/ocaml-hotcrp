@@ -196,7 +196,11 @@ let whoami h =
 module Blocking = struct
   open Lwt_main
 
+  let paper h pid = run @@ paper h pid
+
   let tags h pid = run @@ tags h pid
 
   let add_tag h pid tag = run @@ add_tag h pid tag
+
+  let events h = run @@ events h
 end

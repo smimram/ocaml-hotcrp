@@ -1,13 +1,10 @@
-open Lwt
-open Lwt.Syntax
-
 let read_file fname =
   let ic = open_in fname in
   let s = really_input_string ic @@ in_channel_length ic in
   close_in ic;
   s
 
-let main () =
+let () =
   let url = read_file "url" in
   let token = read_file "token" in
   Printf.printf "Testing: %s\n%!" url;
@@ -21,9 +18,7 @@ let main () =
   (* Printf.printf "ids: %s\n%!" (String.concat "," @@ List.map string_of_int ids); *)
   (* Printf.printf "tags: %s\n%!" (String.concat ", " tags); *)
   (* let* _ = HotCRP.add_comment h 993 ~text:"This is a test" () in *)
-  let* p = HotCRP.paper h 10 in
+  let p = HotCRP.Blocking.paper h 10 in
   Printf.printf "%d authors\n%!" (List.length p.authors);
-  return ()
-
-let () =
-  Lwt_main.run @@ main ()
+  let e = HotCRP.Blocking.events h in
+  Printf.printf "events: %s\n%!" (String.concat ", " e)
