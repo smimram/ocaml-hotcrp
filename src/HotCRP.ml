@@ -50,6 +50,9 @@ module JSON = struct
     let open Yojson.Safe.Util in
     if not (to_bool @@ member "ok" json) then raise (Error (Yojson.Safe.to_string json))
 
+  let papers h =
+    get h "/papers" []
+
   let paper h pid =
     get h (string_of_int pid^"/paper") []
 
@@ -148,14 +151,21 @@ type paper =
     authors : author list;
   }
 
-(** Get a paper. *)
-let paper h pid =
-  let* json = JSON.paper h pid in
-  let paper = member "paper" json in
+let paper_of_json paper =
   let title = to_string @@ member "title" paper in
   let abstract = to_string @@ member "abstract" paper in
   let authors = List.map to_author @@ to_list @@ member "authors" paper in
   return { title; abstract; authors }
+
+(** All papers. *)
+let papers h =
+  let* json = JSON.papers h in
+  json |> member "papers" |> to_list |> List.map paper_of_json |> return
+
+(** Get a paper. *)
+let paper h pid =
+  let* json = JSON.paper h pid in
+  member "paper" json |> paper_of_json
 
 (** Add tags. *)
 let add_tags h pid tags =
@@ -195,6 +205,8 @@ let whoami h =
 (** Blocking interface. *)
 module Blocking = struct
   open Lwt_main
+
+  let papers h = run @@ papers h
 
   let paper h pid = run @@ paper h pid
 
