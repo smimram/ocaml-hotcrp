@@ -207,6 +207,8 @@ let whoami h =
 module Blocking = struct
   open Lwt_main
 
+  let make = make
+
   let papers h = run @@ papers h
 
   let paper h pid = run @@ paper h pid
