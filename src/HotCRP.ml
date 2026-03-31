@@ -87,8 +87,9 @@ module JSON = struct
     get h "/alltags" []
 
   (** Perform a search. *)
-  let search h query =
-    get h "search" ["q",query]
+  let search h ?(fields=[]) query =
+    let fields = if fields = [] then [] else ["f",String.concat "," fields] in
+    get h "search" (["q",query]@fields)
 
   (** Retrieve settings. *)
   let settings h =
@@ -206,6 +207,10 @@ let whoami h =
 (** Blocking interface. *)
 module Blocking = struct
   open Lwt_main
+
+  type nonrec t = t
+
+  type nonrec paper = paper
 
   let make = make
 
