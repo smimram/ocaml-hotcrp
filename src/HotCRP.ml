@@ -79,6 +79,7 @@ module JSON = struct
   let add_tags h pid tags =
     post h (string_of_int pid^"/tags") [] ["addtags",tags]
 
+  (** Delete tags. *)
   let delete_tags h pid tags =
     post h (string_of_int pid^"/tags") [] ["deltags",tags]
 
@@ -214,5 +215,9 @@ module Blocking = struct
 
   let add_tag h pid tag = run @@ add_tag h pid tag
 
+  let delete_tag h pid tag = run @@ delete_tag h pid tag
+
   let events h = run @@ events h
+
+  let search_ids h query = run @@ search_ids h query
 end
