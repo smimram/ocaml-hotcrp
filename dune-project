@@ -1,5 +1,6 @@
 (lang dune 3.14)
 (name hotcrp)
+(version 0.1.0)
 (license LGPL-2.1-only)
 (source (github smimram/ocaml-hotcrp))
 (authors "Samuel Mimram <smimram@gmail.com>")
